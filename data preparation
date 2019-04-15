@@ -1,0 +1,55 @@
+for train or val:
+for each state:
+	load state.geojson
+	peel back layers and extract list of building coordinates
+	convert long,lat to mercator
+	calculate centoid
+	bin buildings by centroid into 2-D sparse array of 100m boxes
+	select buildings randomly until number of buildings >= 0.003 * total
+	for each building:		
+		generate 100m x 100m bbox such that centroid lies within, and coordinates are multiples of 100
+		download image tile for bbox
+		give image incremented image_id
+		check buildings in 3x3 grid of boxes centered on bbox
+		include buildings with at least 1 point within bbox		
+		for each mask:
+			give mask incremented id
+			transform coordinates from cartesian mercator to pixels within 300x300
+			calculate bbox
+			calculate area
+			put coords into list of floats, alternating x and y, called "segmentation"
+			put bbox into list of floats called "bbox"
+			category_id = 100
+			iscrowd = 0
+			make dict: area, bbox, category_id, id, image_id, iscrowd, segmentation
+make list of dicts (the one with segmentation) called "annotations"
+for each image:
+	make dict:
+		file_name = 'image_id'.jpg #padded with zeros to 12 numeric digits
+		height = 300
+		id = int(image_id)
+		width = 300
+	make list of dicts called "images"
+copy list "categories" and dict "info" from default annotation.json
+make annotation.json:
+	annotations
+	categories
+	images
+	info
+
+
+
+state_tiles
+	tiles within current state
+	[[tile],[tile],[tile]]
+tile_buildings
+	buildings within current tile
+	[[building],[building],[building]]
+state_buildings:
+	[[[building],[building],[building]],
+	[[building],[building],[building]],
+	[[building],[building],[building]]]
+country_tiles:
+	same structure as state tiles. after each state, countrytiles.append(state_tiles)
+country_buildings:
+	same structure as state buildings. after each state, country_buildings.append(state_buildings)
